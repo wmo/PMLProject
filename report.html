@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Willem Moors" />
+  <title>Report by W.Moors - Practical Machine Learning: Project</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #0000ff; }
+code > span.ch { color: #008080; }
+code > span.st { color: #008080; }
+code > span.co { color: #008000; }
+code > span.ot { color: #ff4000; }
+code > span.al { color: #ff0000; }
+code > span.er { font-weight: bold; }
+  </style>
+  <link href="data:text/css,body%2C%20td%20%7B%0A%20%20%20font%2Dfamily%3A%20sans%2Dserif%3B%0A%20%20%20background%2Dcolor%3A%20white%3B%0A%20%20%20font%2Dsize%3A%2013px%3B%0A%7D%0A%0Abody%20%7B%0A%20%20max%2Dwidth%3A%20800px%3B%0A%20%20margin%3A%20auto%3B%0A%20%20padding%3A%201em%3B%0A%20%20line%2Dheight%3A%2020px%3B%0A%7D%0A%0Att%2C%20code%2C%20pre%20%7B%0A%20%20%20font%2Dfamily%3A%20%27DejaVu%20Sans%20Mono%27%2C%20%27Droid%20Sans%20Mono%27%2C%20%27Lucida%20Console%27%2C%20Consolas%2C%20Monaco%2C%20monospace%3B%0A%7D%0A%0Ah1%20%7B%0A%20%20%20font%2Dsize%3A2%2E2em%3B%0A%7D%0A%0Ah2%20%7B%0A%20%20%20font%2Dsize%3A1%2E8em%3B%0A%7D%0A%0Ah3%20%7B%0A%20%20%20font%2Dsize%3A1%2E4em%3B%0A%7D%0A%0Ah4%20%7B%0A%20%20%20font%2Dsize%3A1%2E0em%3B%0A%7D%0A%0Ah5%20%7B%0A%20%20%20font%2Dsize%3A0%2E9em%3B%0A%7D%0A%0Ah6%20%7B%0A%20%20%20font%2Dsize%3A0%2E8em%3B%0A%7D%0A%0Aa%3Avisited%20%7B%0A%20%20%20color%3A%20rgb%2850%25%2C%200%25%2C%2050%25%29%3B%0A%7D%0A%0Apre%2C%20img%20%7B%0A%20%20max%2Dwidth%3A%20100%25%3B%0A%7D%0Apre%20%7B%0A%20%20overflow%2Dx%3A%20auto%3B%0A%7D%0Apre%20code%20%7B%0A%20%20%20display%3A%20block%3B%20padding%3A%200%2E5em%3B%0A%7D%0A%0Acode%20%7B%0A%20%20font%2Dsize%3A%2092%25%3B%0A%20%20border%3A%201px%20solid%20%23ccc%3B%0A%7D%0A%0Acode%5Bclass%5D%20%7B%0A%20%20background%2Dcolor%3A%20%23F8F8F8%3B%0A%7D%0A%0Atable%2C%20td%2C%20th%20%7B%0A%20%20border%3A%20none%3B%0A%7D%0A%0Ablockquote%20%7B%0A%20%20%20color%3A%23666666%3B%0A%20%20%20margin%3A0%3B%0A%20%20%20padding%2Dleft%3A%201em%3B%0A%20%20%20border%2Dleft%3A%200%2E5em%20%23EEE%20solid%3B%0A%7D%0A%0Ahr%20%7B%0A%20%20%20height%3A%200px%3B%0A%20%20%20border%2Dbottom%3A%20none%3B%0A%20%20%20border%2Dtop%2Dwidth%3A%20thin%3B%0A%20%20%20border%2Dtop%2Dstyle%3A%20dotted%3B%0A%20%20%20border%2Dtop%2Dcolor%3A%20%23999999%3B%0A%7D%0A%0A%40media%20print%20%7B%0A%20%20%20%2A%20%7B%0A%20%20%20%20%20%20background%3A%20transparent%20%21important%3B%0A%20%20%20%20%20%20color%3A%20black%20%21important%3B%0A%20%20%20%20%20%20filter%3Anone%20%21important%3B%0A%20%20%20%20%20%20%2Dms%2Dfilter%3A%20none%20%21important%3B%0A%20%20%20%7D%0A%0A%20%20%20body%20%7B%0A%20%20%20%20%20%20font%2Dsize%3A12pt%3B%0A%20%20%20%20%20%20max%2Dwidth%3A100%25%3B%0A%20%20%20%7D%0A%0A%20%20%20a%2C%20a%3Avisited%20%7B%0A%20%20%20%20%20%20text%2Ddecoration%3A%20underline%3B%0A%20%20%20%7D%0A%0A%20%20%20hr%20%7B%0A%20%20%20%20%20%20visibility%3A%20hidden%3B%0A%20%20%20%20%20%20page%2Dbreak%2Dbefore%3A%20always%3B%0A%20%20%20%7D%0A%0A%20%20%20pre%2C%20blockquote%20%7B%0A%20%20%20%20%20%20padding%2Dright%3A%201em%3B%0A%20%20%20%20%20%20page%2Dbreak%2Dinside%3A%20avoid%3B%0A%20%20%20%7D%0A%0A%20%20%20tr%2C%20img%20%7B%0A%20%20%20%20%20%20page%2Dbreak%2Dinside%3A%20avoid%3B%0A%20%20%20%7D%0A%0A%20%20%20img%20%7B%0A%20%20%20%20%20%20max%2Dwidth%3A%20100%25%20%21important%3B%0A%20%20%20%7D%0A%0A%20%20%20%40page%20%3Aleft%20%7B%0A%20%20%20%20%20%20margin%3A%2015mm%2020mm%2015mm%2010mm%3B%0A%20%20%20%7D%0A%0A%20%20%20%40page%20%3Aright%20%7B%0A%20%20%20%20%20%20margin%3A%2015mm%2010mm%2015mm%2020mm%3B%0A%20%20%20%7D%0A%0A%20%20%20p%2C%20h2%2C%20h3%20%7B%0A%20%20%20%20%20%20orphans%3A%203%3B%20widows%3A%203%3B%0A%20%20%20%7D%0A%0A%20%20%20h2%2C%20h3%20%7B%0A%20%20%20%20%20%20page%2Dbreak%2Dafter%3A%20avoid%3B%0A%20%20%20%7D%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="header">
+<h1 class="title">Practical Machine Learning: Project</h1>
+<h2 class="author">Willem Moors</h2>
+</div>
+<h1 id="introduction">Introduction</h1>
+<p><em>Assignment</em> : use bla bla data to bla bla</p>
+<h2 id="executive-summary">Executive summary</h2>
+<p>tl;dr</p>
+<h1 id="load-the-data">Load the data</h1>
+<p>Load the clean data</p>
+<pre class="sourceCode r"><code class="sourceCode r">x_df &lt;-<span class="st"> </span><span class="kw">readRDS</span>(<span class="st">&quot;x_df.rds&quot;</span>)
+y_v  &lt;-<span class="st"> </span><span class="kw">readRDS</span>(<span class="st">&quot;y_v.rds&quot;</span>)</code></pre>
+<h2 id="split-into-training-and-test">Split into training and test</h2>
+<pre class="sourceCode r"><code class="sourceCode r">nr=<span class="kw">nrow</span>(x_df)
+train=<span class="kw">sample</span>(<span class="dv">1</span>:nr,nr*.<span class="dv">75</span>)
+xtrain_df=x_df[train,]
+ytrain_v=y_v[train]
+<span class="kw">dim</span>(xtrain_df); <span class="kw">length</span>(ytrain_v)</code></pre>
+<pre><code>## [1] 14716    55</code></pre>
+<pre><code>## [1] 14716</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">xtest_df=x_df[-train,] 
+ytest_v=y_v[-train]
+<span class="kw">dim</span>(xtest_df); <span class="kw">length</span>(ytest_v)</code></pre>
+<pre><code>## [1] 4906   55</code></pre>
+<pre><code>## [1] 4906</code></pre>
+<h1 id="fit-a-randomforest">Fit a randomforest</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(randomForest)</code></pre>
+<pre><code>## randomForest 4.6-10
+## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">fit=<span class="kw">randomForest</span>(xtrain_df,ytrain_v) 
+
+<span class="kw">summary</span>(fit)</code></pre>
+<pre><code>##                 Length Class  Mode     
+## call                3  -none- call     
+## type                1  -none- character
+## predicted       14716  factor numeric  
+## err.rate         3000  -none- numeric  
+## confusion          30  -none- numeric  
+## votes           73580  matrix numeric  
+## oob.times       14716  -none- numeric  
+## classes             5  -none- character
+## importance         55  -none- numeric  
+## importanceSD        0  -none- NULL     
+## localImportance     0  -none- NULL     
+## proximity           0  -none- NULL     
+## ntree               1  -none- numeric  
+## mtry                1  -none- numeric  
+## forest             14  -none- list     
+## y               14716  factor numeric  
+## test                0  -none- NULL     
+## inbag               0  -none- NULL</code></pre>
+<h2 id="predict-the-test-results">Predict the test results</h2>
+<pre class="sourceCode r"><code class="sourceCode r">ytest_pred_v &lt;-<span class="st"> </span><span class="kw">predict</span>(fit,xtest_df) 
+
+numtrue=<span class="st"> </span><span class="kw">sum</span>(ytest_v==ytest_pred_v) 
+numtrue</code></pre>
+<pre><code>## [1] 4888</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">ratetrue=<span class="st"> </span><span class="kw">round</span>(<span class="dv">100</span>*numtrue/<span class="kw">length</span>(ytest_v),<span class="dv">2</span>)
+ratetrue</code></pre>
+<pre><code>## [1] 99.63</code></pre>
+<h2 id="show-the-confusion-matrix">Show the confusion matrix</h2>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(caret)</code></pre>
+<pre><code>## Loading required package: lattice
+## Loading required package: ggplot2
+## Loading required package: methods</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">confusionMatrix</span>( ytest_v, ytest_pred_v )$table</code></pre>
+<pre><code>##           Reference
+## Prediction    A    B    C    D    E
+##          A 1435    0    0    0    0
+##          B    6  958    0    0    0
+##          C    0    4  837    0    0
+##          D    0    0    8  771    0
+##          E    0    0    0    0  887</code></pre>
+</body>
+</html>
