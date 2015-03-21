@@ -9,11 +9,7 @@ output:
     fig_caption: yes
 ---
 
-```{r echo=F,results='hide',warning=F,message=F } 
-# load the libraries
-library(randomForest)
-library(caret)
-``` 
+
 
 # Introduction
 
@@ -57,7 +53,8 @@ Note: the above diagram may give the impression that the split into training and
 
 In this step we create a dataframe called `meta` which provides information about the given training data, to be used as basis for judging which columns to include.
 
-```{r}
+
+```r
 raw_df <- read.table("pml-training.csv" , sep=",", head=T, as.is=T, na.strings="NA",
                      quote='"',stringsAsFactors=T )
 
@@ -96,7 +93,8 @@ A number of columns were manually selected to be excluded (eg. "raw_timestamp_pa
 
 The selected columns that we are continuing with, are the ones in above dataframe that have a total (column 'tot') score of less than 5. 
 
-```{r}
+
+```r
 selcols= as.vector(meta[meta$tot<5,"vn"])
 
 x_df=raw_df[,selcols]            # predictors (dataframe)
@@ -117,7 +115,8 @@ for (i in 3:ncol(x_df)) {
 
 To the challenge data we apply exactly the same subsetting/cleaning that was done on the training data.
 
-```{r}
+
+```r
 raw_df <- read.table("pml-testing.csv" , sep=",", head=T, as.is=T, na.strings="NA",
                      quote='"',stringsAsFactors=T )
 
@@ -153,14 +152,16 @@ Randomly split the dataset into a training set and test set, in a 75% ratio.
 - the training set will be used to fit the model 
 - the test set will be used to validate the model
 
-```{r}
+
+```r
 nr=nrow(x_df)
 train=sample(1:nr,nr*.75)
 xtrain_df=x_df[train,]
 ytrain_v=y_v[train]
 ```
 
-```{r}
+
+```r
 xtest_df=x_df[-train,] 
 ytest_v=y_v[-train]
 ```
@@ -169,45 +170,92 @@ ytest_v=y_v[-train]
 
 This is the most time-consuming step of the whole process: fitting a random forest. 
 
-```{r}
+
+```r
 fit=randomForest(xtrain_df,ytrain_v) 
 
 summary(fit)
+```
+
+```
+##                 Length Class  Mode     
+## call                3  -none- call     
+## type                1  -none- character
+## predicted       14716  factor numeric  
+## err.rate         3000  -none- numeric  
+## confusion          30  -none- numeric  
+## votes           73580  matrix numeric  
+## oob.times       14716  -none- numeric  
+## classes             5  -none- character
+## importance         55  -none- numeric  
+## importanceSD        0  -none- NULL     
+## localImportance     0  -none- NULL     
+## proximity           0  -none- NULL     
+## ntree               1  -none- numeric  
+## mtry                1  -none- numeric  
+## forest             14  -none- list     
+## y               14716  factor numeric  
+## test                0  -none- NULL     
+## inbag               0  -none- NULL
 ```
 
 ## Training result prediction 
 
 Make a prediction on the training data, to judge the correctness of the data.
 
-```{r}
+
+```r
 ytrain_pred_v <- predict(fit,xtrain_df) 
 
 numtrue= sum(ytrain_v==ytrain_pred_v) 
 percentcorrect= round(100*numtrue/length(ytrain_v),2)
 ```
-The percent correctly predicted outcomes, when applied to the training data is **`r percentcorrect`%**. 
+The percent correctly predicted outcomes, when applied to the training data is **100%**. 
 
 **Confusion Matrix:**
-```{r}
+
+```r
 confusionMatrix( ytrain_v, ytrain_pred_v )$table
+```
+
+```
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 4187    0    0    0    0
+##          B    0 2859    0    0    0
+##          C    0    0 2524    0    0
+##          D    0    0    0 2403    0
+##          E    0    0    0    0 2743
 ```
 
 ## Test result prediction 
 
-```{r}
+
+```r
 ytest_pred_v <- predict(fit,xtest_df) 
 
 numtrue= sum(ytest_v==ytest_pred_v) 
 percentcorrect= round(100*numtrue/length(ytest_v),2)
 ```
-The percent correctly predicted outcomes, when applied to the testing data is **`r percentcorrect`%**. 
-Which means that the out-of-sample error is  **`r 100-percentcorrect`%**. 
+The percent correctly predicted outcomes, when applied to the testing data is **99.78%**. 
+Which means that the out-of-sample error is  **0.22%**. 
 
 
 
 **Confusion Matrix:**
-```{r}
+
+```r
 confusionMatrix( ytest_v, ytest_pred_v )$table
+```
+
+```
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 1393    0    0    0    0
+##          B    1  937    0    0    0
+##          C    0    2  896    0    0
+##          D    0    0    6  807    0
+##          E    0    0    0    2  862
 ```
 
 Conclusion: to our great happiness this error is very close to 0%, so this is a more than acceptable fit, with an impressively small error. No further tweaks to be applied, we are happy to proceed with predicting the challenge. 
@@ -216,9 +264,16 @@ Conclusion: to our great happiness this error is very close to 0%, so this is a 
 # Step 3: predict the challenge
 
 
-```{r}
+
+```r
 ychallenge_pred_v <- predict(fit,xchallenge_df) 
 ychallenge_pred_v 
+```
+
+```
+##  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 
+##  B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B 
+## Levels: A B C D E
 ```
 
 This is the result submitted to the coursera website for judging. And it turned out to be 100% correct! 
