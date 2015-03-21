@@ -1,12 +1,9 @@
-
 ---
 title: "Practical Machine Learning: Project"
 author: "Willem Moors"
 output:
   html_document:
     keep_md: true
-  pdf_document:
-    fig_caption: yes
 ---
 
 
@@ -145,13 +142,14 @@ We'll proceed to the next step with these objects:
 
 # Step 2 : fit a model 
 
-# Split the training data into training and test 
+## Split the training data into training and test 
 
 Randomly split the dataset into a training set and test set, in a 75% ratio. 
 
 - the training set will be used to fit the model 
 - the test set will be used to validate the model
 
+Training set: 
 
 ```r
 nr=nrow(x_df)
@@ -160,6 +158,7 @@ xtrain_df=x_df[train,]
 ytrain_v=y_v[train]
 ```
 
+Test set: 
 
 ```r
 xtest_df=x_df[-train,] 
@@ -221,11 +220,11 @@ confusionMatrix( ytrain_v, ytrain_pred_v )$table
 ```
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 4187    0    0    0    0
-##          B    0 2859    0    0    0
-##          C    0    0 2524    0    0
-##          D    0    0    0 2403    0
-##          E    0    0    0    0 2743
+##          A 4125    0    0    0    0
+##          B    0 2870    0    0    0
+##          C    0    0 2596    0    0
+##          D    0    0    0 2414    0
+##          E    0    0    0    0 2711
 ```
 
 ## Test result prediction 
@@ -237,8 +236,8 @@ ytest_pred_v <- predict(fit,xtest_df)
 numtrue= sum(ytest_v==ytest_pred_v) 
 percentcorrect= round(100*numtrue/length(ytest_v),2)
 ```
-The percent correctly predicted outcomes, when applied to the testing data is **99.78%**. 
-Which means that the out-of-sample error is  **0.22%**. 
+The percent correctly predicted outcomes, when applied to the testing data is **99.59%**. 
+Which means that the out-of-sample error is  **0.41%**. 
 
 
 
@@ -251,18 +250,19 @@ confusionMatrix( ytest_v, ytest_pred_v )$table
 ```
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1393    0    0    0    0
-##          B    1  937    0    0    0
-##          C    0    2  896    0    0
-##          D    0    0    6  807    0
-##          E    0    0    0    2  862
+##          A 1455    0    0    0    0
+##          B    1  926    0    0    0
+##          C    0    7  814    5    0
+##          D    0    0    4  798    0
+##          E    0    0    0    3  893
 ```
 
-Conclusion: to our great happiness this error is very close to 0%, so this is a more than acceptable fit, with an impressively small error. No further tweaks to be applied, we are happy to proceed with predicting the challenge. 
+Conclusion: this out of sample error is very close to 0, which makes this is a more-than-acceptable fit. No further tweaks need to be applied to the model, we are happy to proceed to next step: predicting the challenge. 
 
 
 # Step 3: predict the challenge
 
+This is the ultimate goal of the project, predict the `classe` outcome for the challenge data contained in the file `pml-testing.csv`. 
 
 
 ```r
@@ -276,7 +276,7 @@ ychallenge_pred_v
 ## Levels: A B C D E
 ```
 
-This is the result submitted to the coursera website for judging. And it turned out to be 100% correct! 
+This result was submitted to the MOOC's Coursera website for judgement. And it turned out to be 100% correct! 
 
 
 
