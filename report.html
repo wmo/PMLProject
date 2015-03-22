@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
   <meta name="author" content="Willem Moors" />
-  <title>Report by W.Moors - Practical Machine Learning: Project</title>
+  <title>PML Project - Practical Machine Learning: Project</title>
   <style type="text/css">code{white-space: pre;}</style>
   <style type="text/css">
 table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
@@ -29,28 +29,33 @@ code > span.er { font-weight: bold; }
 <h2 class="author">Willem Moors</h2>
 </div>
 <h1 id="introduction">Introduction</h1>
-<p><em>Assignment</em> : this project is about making predictions about what type of physical action was undertaken by a person being monitored by an activity monitoring device (eg. fitbit, fuelband, ...). The person(s) in question were asked to lift barbells correctly and incorrectly in 5 different ways. Depending on the data gathered by the monitoring device, a prediction should be made which action was undertaken.</p>
+<p><em>Assignment</em> : this project is about making predictions about what type of physical action was undertaken by a person being monitored by an activity monitoring device (eg. fitbit, fuelband, ...). The person(s) in question were asked to lift barbells correctly and incorrectly in 5 different ways. Depending on the data gathered by the monitoring device, a prediction should be made as to which action had been undertaken.</p>
 <p>More information about the project and where the data comes from: <a href="http://groupware.les.inf.puc-rio.br/har">groupware.les.inf.puc-rio.br/har</a> (Weight Lifting Exercise Dataset).</p>
 <h2 id="strategy">Strategy</h2>
 <p>Outline of how to tackle the problem:</p>
 <ul>
-<li><p>check the given data, see which columns make most chance of providing a correct response and subset accordingly</p></li>
+<li><p>check the given datasets, to see which columns make most chance of providing a correct response and which columns can be disregarded 'at-first-sight'. Subset accordingly.</p></li>
 <li><p>clean/convert the data</p></li>
 <li><p>split the data into training and testing data</p></li>
 <li><p>apply the model on the training data and testing data.</p></li>
 <li><p>judge from the training and testing error if the prediction is close enough, otherwise start over</p></li>
 <li><p>finally apply the model on the challenge, and get the requested prediction</p></li>
 </ul>
-<p>The chosen method is &quot;randomForest&quot;, because it is one of the best performing algorithms.</p>
-<p>Given are two files: - pml-training.csv : the predictors plus the outcome, to train a model to. To be split into train and test (validate). - pml-testing.csv : the predictors but without the outcome, that is what needs to be predicted. Ie. this is the challenge data.</p>
-<p>Overview: how the data from the given files is reorganized into dataframes and vectors:</p>
+<p>The chosen prediction algorithm is &quot;randomForest&quot;, because it is one of the best performing algorithms.</p>
+<p>Given are two files:</p>
+<ul>
+<li>pml-training.csv : the predictors plus the outcome, to train a model to. To be split into train and test (validate).</li>
+<li>pml-testing.csv : the predictors but without the outcome, that is what needs to be predicted. Ie. this is the challenge data.</li>
+</ul>
+<h3 id="overview">Overview</h3>
+<p>How the data from the given files is organized into dataframes and vectors: dataframes x.. contain predictors, while vectors y.. contain the outcome.</p>
 <div class="figure">
 <img src="data_objects.png" />
 </div>
-<p>Note: the above diagram may give the impression that the split into training and test data occurs at a fixed position, but in fact the elements are chosen randomly.</p>
+<p>Note: the above diagram may give the impression that the split into training and test data occurs at a fixed position, but in fact the group a row belongs to is chosen randomly.</p>
 <h1 id="step-1-clean-and-subset-the-data">Step 1: clean and subset the data</h1>
 <h2 id="training-data">Training data</h2>
-<p>In this step we create a dataframe called <code>meta</code> which provides information about the given training data, to be used as basis for judging which columns to include.</p>
+<p>In this step we create a dataframe called <code>meta</code> which provides information about the given training data. It provides the selection criterata about which columns to include or exclude in the training data.</p>
 <pre class="sourceCode r"><code class="sourceCode r">raw_df &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;pml-training.csv&quot;</span> , <span class="dt">sep=</span><span class="st">&quot;,&quot;</span>, <span class="dt">head=</span>T, <span class="dt">as.is=</span>T, <span class="dt">na.strings=</span><span class="st">&quot;NA&quot;</span>,
                      <span class="dt">quote=</span><span class="st">&#39;&quot;&#39;</span>,<span class="dt">stringsAsFactors=</span>T )
 
@@ -58,10 +63,10 @@ nc &lt;-<span class="st"> </span><span class="kw">ncol</span>(raw_df)
 nr &lt;-<span class="st"> </span><span class="kw">nrow</span>(raw_df)
 
 <span class="co"># loop over each column, gather some statistics</span>
-vn &lt;-<span class="st"> </span><span class="kw">character</span>(nc)
-nac &lt;-<span class="st"> </span><span class="kw">numeric</span>(nc)
-divc &lt;-<span class="st"> </span><span class="kw">numeric</span>(nc)
-blnk &lt;-<span class="st"> </span><span class="kw">numeric</span>(nc)
+vn &lt;-<span class="st"> </span><span class="kw">character</span>(nc)  <span class="co"># name of the column</span>
+nac &lt;-<span class="st"> </span><span class="kw">numeric</span>(nc)   <span class="co"># number of NA cells in a column</span>
+divc &lt;-<span class="st"> </span><span class="kw">numeric</span>(nc)  <span class="co"># number of cells in a column containing the &quot;DIV/0&quot; error flag</span>
+blnk &lt;-<span class="st"> </span><span class="kw">numeric</span>(nc)  <span class="co"># number of cells in a column containing nothing (not are not NA) </span>
 for (i in <span class="dv">1</span>:nc) { 
     vn[i]   &lt;-<span class="st"> </span><span class="kw">names</span>(raw_df)[i]
     nac[i]  &lt;-<span class="st"> </span><span class="kw">round</span>(<span class="dv">100</span>*<span class="kw">length</span>(<span class="kw">which</span>(<span class="kw">is.na</span>(raw_df[,i])))/nr,<span class="dv">0</span>)
@@ -74,12 +79,13 @@ for (i in <span class="dv">1</span>:nc) {
 } 
 meta &lt;-<span class="st"> </span><span class="kw">data.frame</span>(vn,nac,divc,blnk)
 meta$tot=meta$nac+meta$divc+meta$blnk
-<span class="co"># manually selected columns to be dropped</span>
-meta[meta$vn %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;X&quot;</span>,<span class="st">&quot;raw_timestamp_part_1&quot;</span>, <span class="st">&quot;raw_timestamp_part_2&quot;</span>, <span class="st">&quot;cvtd_timestamp&quot;</span>,<span class="st">&quot;classe&quot;</span>),<span class="st">&quot;tot&quot;</span>]=<span class="dv">100</span></code></pre>
+<span class="co"># manually selected columns to be excluded</span>
+meta[meta$vn %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;X&quot;</span>,<span class="st">&quot;raw_timestamp_part_1&quot;</span>, <span class="st">&quot;raw_timestamp_part_2&quot;</span>, 
+                    <span class="st">&quot;cvtd_timestamp&quot;</span>,<span class="st">&quot;classe&quot;</span>),<span class="st">&quot;tot&quot;</span>]=<span class="dv">100</span></code></pre>
 <p>The above dataframe counts :</p>
 <ul>
 <li>how many NA's occur in a column</li>
-<li>how often the label &quot;#DIV/5!&quot; occurs in a column (which prevented the auto-conversion of the column to numeric)</li>
+<li>how often the label &quot;#DIV/0!&quot; occurs in a column (which prevented the auto-conversion of the column to numeric)</li>
 <li>how often the text is blank in a column</li>
 </ul>
 <p>These counts are not expressed in absolute numbers, but in percentages, to make it easier to compare.</p>
@@ -94,7 +100,7 @@ y_v=<span class="kw">as.factor</span>(raw_df[,<span class="st">&quot;classe&quot
 x_df$user_name &lt;-<span class="st"> </span><span class="kw">as.factor</span>(x_df$user_name)
 x_df$new_window &lt;-<span class="st"> </span><span class="kw">as.factor</span>(x_df$new_window)
 
-<span class="co"># all the other columns -&gt; conversions to numeric </span>
+<span class="co"># all the other columns are converted to numeric </span>
 for (i in <span class="dv">3</span>:<span class="kw">ncol</span>(x_df)) { 
     x_df[,i]&lt;-<span class="st"> </span><span class="kw">as.numeric</span>(x_df[,i])
 }</code></pre>
@@ -109,11 +115,11 @@ xchallenge_df=raw_df[,selcols]  <span class="co"># restrict to only the selected
 xchallenge_df$user_name=<span class="kw">factor</span>( xchallenge_df$user_name, <span class="kw">levels</span>(x_df$user_name ) )  
 xchallenge_df$new_window=<span class="kw">factor</span>( xchallenge_df$new_window, <span class="kw">levels</span>(x_df$new_window) )  
 
-<span class="co"># all the other columns -&gt; convert to numeric </span>
+<span class="co"># all the other columns are converted to numeric </span>
 for (i in <span class="dv">3</span>:<span class="kw">ncol</span>(xchallenge_df)) { 
     xchallenge_df[,i]&lt;-<span class="st"> </span><span class="kw">as.numeric</span>(xchallenge_df[,i])
 }</code></pre>
-<h2 id="summary-of-step-1">Summary of step 1</h2>
+<h3 id="summary-of-step-1">Summary of step 1</h3>
 <p>We've cleaned the data, and reduced the number of columns to a subset.</p>
 <p>We'll proceed to the next step with these objects:</p>
 <ul>
@@ -171,27 +177,29 @@ percentcorrect=<span class="st"> </span><span class="kw">round</span>(<span clas
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">confusionMatrix</span>( ytrain_v, ytrain_pred_v )$table</code></pre>
 <pre><code>##           Reference
 ## Prediction    A    B    C    D    E
-##          A 4125    0    0    0    0
-##          B    0 2870    0    0    0
-##          C    0    0 2596    0    0
-##          D    0    0    0 2414    0
-##          E    0    0    0    0 2711</code></pre>
+##          A 4226    0    0    0    0
+##          B    0 2837    0    0    0
+##          C    0    0 2548    0    0
+##          D    0    0    0 2430    0
+##          E    0    0    0    0 2675</code></pre>
+<p>The values are on the diagonal are the correct predictions. The values off-diagonal are the errors. In this case all predictions are correct, a very promising result.</p>
 <h2 id="test-result-prediction">Test result prediction</h2>
 <pre class="sourceCode r"><code class="sourceCode r">ytest_pred_v &lt;-<span class="st"> </span><span class="kw">predict</span>(fit,xtest_df) 
 
 numtrue=<span class="st"> </span><span class="kw">sum</span>(ytest_v==ytest_pred_v) 
 percentcorrect=<span class="st"> </span><span class="kw">round</span>(<span class="dv">100</span>*numtrue/<span class="kw">length</span>(ytest_v),<span class="dv">2</span>)</code></pre>
-<p>The percent correctly predicted outcomes, when applied to the testing data is <strong>99.59%</strong>. Which means that the out-of-sample error is <strong>0.41%</strong>.</p>
+<p>The percent correctly predicted outcomes, when applied to the testing data is <strong>99.69%</strong>. Which means that the out-of-sample error is <strong>0.31%</strong>.</p>
 <p><strong>Confusion Matrix:</strong></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">confusionMatrix</span>( ytest_v, ytest_pred_v )$table</code></pre>
 <pre><code>##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1455    0    0    0    0
-##          B    1  926    0    0    0
-##          C    0    7  814    5    0
-##          D    0    0    4  798    0
-##          E    0    0    0    3  893</code></pre>
-<p>Conclusion: this out of sample error is very close to 0, which makes this is a more-than-acceptable fit. No further tweaks need to be applied to the model, we are happy to proceed to next step: predicting the challenge.</p>
+##          A 1354    0    0    0    0
+##          B    1  959    0    0    0
+##          C    0    1  873    0    0
+##          D    0    0   11  775    0
+##          E    0    0    0    2  930</code></pre>
+<h3 id="summary-of-step-2">Summary of step 2</h3>
+<p>The out of sample error is very close to 0, which makes this is a more-than-acceptable fit. No further tweaks need to be applied to the model, we can merrily proceed to the next step: predicting the challenge.</p>
 <h1 id="step-3-predict-the-challenge">Step 3: predict the challenge</h1>
 <p>This is the ultimate goal of the project, predict the <code>classe</code> outcome for the challenge data contained in the file <code>pml-testing.csv</code>.</p>
 <pre class="sourceCode r"><code class="sourceCode r">ychallenge_pred_v &lt;-<span class="st"> </span><span class="kw">predict</span>(fit,xchallenge_df) 

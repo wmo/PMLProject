@@ -10,7 +10,7 @@ output:
 
 # Introduction
 
-_Assignment_ : this project is about making predictions about what type of physical action was undertaken by a person being monitored by an activity monitoring device (eg. fitbit, fuelband, ...). The person(s) in question were asked to lift barbells correctly and incorrectly in 5 different ways. Depending on the data gathered by the monitoring device, a prediction should be made which action was undertaken. 
+_Assignment_ : this project is about making predictions about what type of physical action was undertaken by a person being monitored by an activity monitoring device (eg. fitbit, fuelband, ...). The person(s) in question were asked to lift barbells correctly and incorrectly in 5 different ways. Depending on the data gathered by the monitoring device, a prediction should be made as to which action had been undertaken. 
 
 More information about the project and where the data comes from: [groupware.les.inf.puc-rio.br/har](http://groupware.les.inf.puc-rio.br/har) (Weight Lifting Exercise Dataset). 
 
@@ -19,7 +19,7 @@ More information about the project and where the data comes from: [groupware.les
 
 Outline of how to tackle the problem:
 
-- check the given data, see which columns make most chance of providing a correct response and subset accordingly 
+- check the given datasets, to see which columns make most chance of providing a correct response and which columns can be disregarded 'at-first-sight'. Subset accordingly.
 
 - clean/convert the data 
 
@@ -31,24 +31,27 @@ Outline of how to tackle the problem:
 
 - finally apply the model on the challenge, and get the requested prediction 
 
-The chosen method is "randomForest", because it is one of the best performing algorithms. 
+The chosen prediction algorithm is "randomForest", because it is one of the best performing algorithms. 
 
 Given are two files:
-    - pml-training.csv : the predictors plus the outcome, to train a model to. To be split into train and test (validate).
-    - pml-testing.csv : the predictors but without the outcome, that is what needs to be predicted. Ie. this is the challenge data.
 
-Overview: how the data from the given files is reorganized into dataframes and vectors:
+- pml-training.csv : the predictors plus the outcome, to train a model to. To be split into train and test (validate).
+- pml-testing.csv : the predictors but without the outcome, that is what needs to be predicted. Ie. this is the challenge data.
+
+### Overview
+   
+How the data from the given files is organized into dataframes and vectors: dataframes x.. contain predictors, while vectors y.. contain the outcome. 
 
 ![](data_objects.png)
 
-Note: the above diagram may give the impression that the split into training and test data occurs at a fixed position, but in fact the elements are chosen randomly.
+Note: the above diagram may give the impression that the split into training and test data occurs at a fixed position, but in fact the group a row belongs to is chosen randomly.
 
 
 # Step 1: clean and subset the data 
 
 ## Training data
 
-In this step we create a dataframe called `meta` which provides information about the given training data, to be used as basis for judging which columns to include.
+In this step we create a dataframe called `meta` which provides information about the given training data. It provides the selection criterata about which columns to include or exclude in the training data.
 
 
 ```r
@@ -59,10 +62,10 @@ nc <- ncol(raw_df)
 nr <- nrow(raw_df)
 
 # loop over each column, gather some statistics
-vn <- character(nc)
-nac <- numeric(nc)
-divc <- numeric(nc)
-blnk <- numeric(nc)
+vn <- character(nc)  # name of the column
+nac <- numeric(nc)   # number of NA cells in a column
+divc <- numeric(nc)  # number of cells in a column containing the "DIV/0" error flag
+blnk <- numeric(nc)  # number of cells in a column containing nothing (not are not NA) 
 for (i in 1:nc) { 
     vn[i]   <- names(raw_df)[i]
     nac[i]  <- round(100*length(which(is.na(raw_df[,i])))/nr,0)
@@ -75,13 +78,14 @@ for (i in 1:nc) {
 } 
 meta <- data.frame(vn,nac,divc,blnk)
 meta$tot=meta$nac+meta$divc+meta$blnk
-# manually selected columns to be dropped
-meta[meta$vn %in% c("X","raw_timestamp_part_1", "raw_timestamp_part_2", "cvtd_timestamp","classe"),"tot"]=100
+# manually selected columns to be excluded
+meta[meta$vn %in% c("X","raw_timestamp_part_1", "raw_timestamp_part_2", 
+                    "cvtd_timestamp","classe"),"tot"]=100
 ```
 The above dataframe counts :
 
 - how many NA's occur in a column
-- how often the label "#DIV/5!" occurs in a column (which prevented the auto-conversion of the column to numeric)
+- how often the label "#DIV/0!" occurs in a column (which prevented the auto-conversion of the column to numeric)
 - how often the text is blank in a column
 
 These counts are not expressed in absolute numbers, but in percentages, to make it easier to compare.
@@ -101,7 +105,7 @@ y_v=as.factor(raw_df[,"classe"]) # outcome    (vector)
 x_df$user_name <- as.factor(x_df$user_name)
 x_df$new_window <- as.factor(x_df$new_window)
 
-# all the other columns -> conversions to numeric 
+# all the other columns are converted to numeric 
 for (i in 3:ncol(x_df)) { 
     x_df[,i]<- as.numeric(x_df[,i])
 }
@@ -123,13 +127,13 @@ xchallenge_df=raw_df[,selcols]  # restrict to only the selected columns
 xchallenge_df$user_name=factor( xchallenge_df$user_name, levels(x_df$user_name ) )  
 xchallenge_df$new_window=factor( xchallenge_df$new_window, levels(x_df$new_window) )  
 
-# all the other columns -> convert to numeric 
+# all the other columns are converted to numeric 
 for (i in 3:ncol(xchallenge_df)) { 
     xchallenge_df[,i]<- as.numeric(xchallenge_df[,i])
 }
 ```
 
-## Summary of step 1 
+### Summary of step 1 
 
 We've cleaned the data, and reduced the number of columns to a subset. 
 
@@ -220,12 +224,13 @@ confusionMatrix( ytrain_v, ytrain_pred_v )$table
 ```
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 4125    0    0    0    0
-##          B    0 2870    0    0    0
-##          C    0    0 2596    0    0
-##          D    0    0    0 2414    0
-##          E    0    0    0    0 2711
+##          A 4226    0    0    0    0
+##          B    0 2837    0    0    0
+##          C    0    0 2548    0    0
+##          D    0    0    0 2430    0
+##          E    0    0    0    0 2675
 ```
+The values are on the diagonal are the correct predictions. The values off-diagonal are the errors. In this case all predictions are correct, a very promising result.
 
 ## Test result prediction 
 
@@ -236,8 +241,8 @@ ytest_pred_v <- predict(fit,xtest_df)
 numtrue= sum(ytest_v==ytest_pred_v) 
 percentcorrect= round(100*numtrue/length(ytest_v),2)
 ```
-The percent correctly predicted outcomes, when applied to the testing data is **99.59%**. 
-Which means that the out-of-sample error is  **0.41%**. 
+The percent correctly predicted outcomes, when applied to the testing data is **99.69%**. 
+Which means that the out-of-sample error is  **0.31%**. 
 
 
 
@@ -250,14 +255,16 @@ confusionMatrix( ytest_v, ytest_pred_v )$table
 ```
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1455    0    0    0    0
-##          B    1  926    0    0    0
-##          C    0    7  814    5    0
-##          D    0    0    4  798    0
-##          E    0    0    0    3  893
+##          A 1354    0    0    0    0
+##          B    1  959    0    0    0
+##          C    0    1  873    0    0
+##          D    0    0   11  775    0
+##          E    0    0    0    2  930
 ```
 
-Conclusion: this out of sample error is very close to 0, which makes this is a more-than-acceptable fit. No further tweaks need to be applied to the model, we are happy to proceed to next step: predicting the challenge. 
+### Summary of step 2 
+
+The out of sample error is very close to 0, which makes this is a more-than-acceptable fit. No further tweaks need to be applied to the model, we can merrily proceed to the next step: predicting the challenge. 
 
 
 # Step 3: predict the challenge
@@ -277,6 +284,5 @@ ychallenge_pred_v
 ```
 
 This result was submitted to the MOOC's Coursera website for judgement. And it turned out to be 100% correct! 
-
 
 
