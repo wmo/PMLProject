@@ -55,7 +55,7 @@ code > span.er { font-weight: bold; }
 <p>Note: the above diagram may give the impression that the split into training and test data occurs at a fixed position, but in fact the group a row belongs to is chosen randomly.</p>
 <h1 id="step-1-clean-and-subset-the-data">Step 1: clean and subset the data</h1>
 <h2 id="training-data">Training data</h2>
-<p>In this step we create a dataframe called <code>meta</code> which provides information about the given training data. It provides the selection criterata about which columns to include or exclude in the training data.</p>
+<p>In this step we create a dataframe called <code>meta</code> which provides information about the given training data. It provides the selection criteria about which columns to include or exclude in the training data.</p>
 <pre class="sourceCode r"><code class="sourceCode r">raw_df &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;pml-training.csv&quot;</span> , <span class="dt">sep=</span><span class="st">&quot;,&quot;</span>, <span class="dt">head=</span>T, <span class="dt">as.is=</span>T, <span class="dt">na.strings=</span><span class="st">&quot;NA&quot;</span>,
                      <span class="dt">quote=</span><span class="st">&#39;&quot;&#39;</span>,<span class="dt">stringsAsFactors=</span>T )
 
@@ -66,7 +66,7 @@ nr &lt;-<span class="st"> </span><span class="kw">nrow</span>(raw_df)
 vn &lt;-<span class="st"> </span><span class="kw">character</span>(nc)  <span class="co"># name of the column</span>
 nac &lt;-<span class="st"> </span><span class="kw">numeric</span>(nc)   <span class="co"># number of NA cells in a column</span>
 divc &lt;-<span class="st"> </span><span class="kw">numeric</span>(nc)  <span class="co"># number of cells in a column containing the &quot;DIV/0&quot; error flag</span>
-blnk &lt;-<span class="st"> </span><span class="kw">numeric</span>(nc)  <span class="co"># number of cells in a column containing nothing (not are not NA) </span>
+blnk &lt;-<span class="st"> </span><span class="kw">numeric</span>(nc)  <span class="co"># number of cells in a column containing nothing (and are not NA) </span>
 for (i in <span class="dv">1</span>:nc) { 
     vn[i]   &lt;-<span class="st"> </span><span class="kw">names</span>(raw_df)[i]
     nac[i]  &lt;-<span class="st"> </span><span class="kw">round</span>(<span class="dv">100</span>*<span class="kw">length</span>(<span class="kw">which</span>(<span class="kw">is.na</span>(raw_df[,i])))/nr,<span class="dv">0</span>)
@@ -177,27 +177,28 @@ percentcorrect=<span class="st"> </span><span class="kw">round</span>(<span clas
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">confusionMatrix</span>( ytrain_v, ytrain_pred_v )$table</code></pre>
 <pre><code>##           Reference
 ## Prediction    A    B    C    D    E
-##          A 4226    0    0    0    0
-##          B    0 2837    0    0    0
-##          C    0    0 2548    0    0
-##          D    0    0    0 2430    0
-##          E    0    0    0    0 2675</code></pre>
+##          A 4166    0    0    0    0
+##          B    0 2830    0    0    0
+##          C    0    0 2569    0    0
+##          D    0    0    0 2395    0
+##          E    0    0    0    0 2756</code></pre>
 <p>The values are on the diagonal are the correct predictions. The values off-diagonal are the errors. In this case all predictions are correct, a very promising result.</p>
 <h2 id="test-result-prediction">Test result prediction</h2>
 <pre class="sourceCode r"><code class="sourceCode r">ytest_pred_v &lt;-<span class="st"> </span><span class="kw">predict</span>(fit,xtest_df) 
 
 numtrue=<span class="st"> </span><span class="kw">sum</span>(ytest_v==ytest_pred_v) 
 percentcorrect=<span class="st"> </span><span class="kw">round</span>(<span class="dv">100</span>*numtrue/<span class="kw">length</span>(ytest_v),<span class="dv">2</span>)</code></pre>
-<p>The percent correctly predicted outcomes, when applied to the testing data is <strong>99.69%</strong>. Which means that the out-of-sample error is <strong>0.31%</strong>.</p>
+<p>The percent correctly predicted outcomes, when applied to the testing data is <strong>99.74%</strong>. Which means that the out-of-sample error is <strong>0.26%</strong>.</p>
 <p><strong>Confusion Matrix:</strong></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">confusionMatrix</span>( ytest_v, ytest_pred_v )$table</code></pre>
 <pre><code>##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1354    0    0    0    0
-##          B    1  959    0    0    0
-##          C    0    1  873    0    0
-##          D    0    0   11  775    0
-##          E    0    0    0    2  930</code></pre>
+##          A 1414    0    0    0    0
+##          B    0  965    2    0    0
+##          C    0    3  848    2    0
+##          D    0    0    4  817    0
+##          E    0    0    0    2  849</code></pre>
+<p>As expected the out-of-sample error is a bit bigger than that of the test result prediction: a few values can be found off-diagonal in the confusion matrix.</p>
 <h3 id="summary-of-step-2">Summary of step 2</h3>
 <p>The out of sample error is very close to 0, which makes this is a more-than-acceptable fit. No further tweaks need to be applied to the model, we can merrily proceed to the next step: predicting the challenge.</p>
 <h1 id="step-3-predict-the-challenge">Step 3: predict the challenge</h1>

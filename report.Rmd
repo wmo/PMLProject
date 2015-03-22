@@ -55,7 +55,7 @@ Note: the above diagram may give the impression that the split into training and
 
 ## Training data
 
-In this step we create a dataframe called `meta` which provides information about the given training data. It provides the selection criterata about which columns to include or exclude in the training data.
+In this step we create a dataframe called `meta` which provides information about the given training data. It provides the selection criteria about which columns to include or exclude in the training data.
 
 ```{r}
 raw_df <- read.table("pml-training.csv" , sep=",", head=T, as.is=T, na.strings="NA",
@@ -68,7 +68,7 @@ nr <- nrow(raw_df)
 vn <- character(nc)  # name of the column
 nac <- numeric(nc)   # number of NA cells in a column
 divc <- numeric(nc)  # number of cells in a column containing the "DIV/0" error flag
-blnk <- numeric(nc)  # number of cells in a column containing nothing (not are not NA) 
+blnk <- numeric(nc)  # number of cells in a column containing nothing (and are not NA) 
 for (i in 1:nc) { 
     vn[i]   <- names(raw_df)[i]
     nac[i]  <- round(100*length(which(is.na(raw_df[,i])))/nr,0)
@@ -116,7 +116,7 @@ for (i in 3:ncol(x_df)) {
 
 ## Challenge data
 
-To the challenge data we apply exactly the same subsetting/cleaning that was done on the training data.
+To the challenge data we apply exactly the same sub-setting/cleaning that was done on the training data.
 
 ```{r}
 raw_df <- read.table("pml-testing.csv" , sep=",", head=T, as.is=T, na.strings="NA",
@@ -213,6 +213,9 @@ Which means that the out-of-sample error is  **`r 100-percentcorrect`%**.
 ```{r}
 confusionMatrix( ytest_v, ytest_pred_v )$table
 ```
+
+As expected the out-of-sample error is a bit bigger than that of the test result prediction: a few values can be found off-diagonal in the confusion matrix.
+
 
 ### Summary of step 2 
 

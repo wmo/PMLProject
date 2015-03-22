@@ -51,7 +51,7 @@ Note: the above diagram may give the impression that the split into training and
 
 ## Training data
 
-In this step we create a dataframe called `meta` which provides information about the given training data. It provides the selection criterata about which columns to include or exclude in the training data.
+In this step we create a dataframe called `meta` which provides information about the given training data. It provides the selection criteria about which columns to include or exclude in the training data.
 
 
 ```r
@@ -65,7 +65,7 @@ nr <- nrow(raw_df)
 vn <- character(nc)  # name of the column
 nac <- numeric(nc)   # number of NA cells in a column
 divc <- numeric(nc)  # number of cells in a column containing the "DIV/0" error flag
-blnk <- numeric(nc)  # number of cells in a column containing nothing (not are not NA) 
+blnk <- numeric(nc)  # number of cells in a column containing nothing (and are not NA) 
 for (i in 1:nc) { 
     vn[i]   <- names(raw_df)[i]
     nac[i]  <- round(100*length(which(is.na(raw_df[,i])))/nr,0)
@@ -224,11 +224,11 @@ confusionMatrix( ytrain_v, ytrain_pred_v )$table
 ```
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 4226    0    0    0    0
-##          B    0 2837    0    0    0
-##          C    0    0 2548    0    0
-##          D    0    0    0 2430    0
-##          E    0    0    0    0 2675
+##          A 4166    0    0    0    0
+##          B    0 2830    0    0    0
+##          C    0    0 2569    0    0
+##          D    0    0    0 2395    0
+##          E    0    0    0    0 2756
 ```
 The values are on the diagonal are the correct predictions. The values off-diagonal are the errors. In this case all predictions are correct, a very promising result.
 
@@ -241,8 +241,8 @@ ytest_pred_v <- predict(fit,xtest_df)
 numtrue= sum(ytest_v==ytest_pred_v) 
 percentcorrect= round(100*numtrue/length(ytest_v),2)
 ```
-The percent correctly predicted outcomes, when applied to the testing data is **99.69%**. 
-Which means that the out-of-sample error is  **0.31%**. 
+The percent correctly predicted outcomes, when applied to the testing data is **99.74%**. 
+Which means that the out-of-sample error is  **0.26%**. 
 
 
 
@@ -255,12 +255,15 @@ confusionMatrix( ytest_v, ytest_pred_v )$table
 ```
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1354    0    0    0    0
-##          B    1  959    0    0    0
-##          C    0    1  873    0    0
-##          D    0    0   11  775    0
-##          E    0    0    0    2  930
+##          A 1414    0    0    0    0
+##          B    0  965    2    0    0
+##          C    0    3  848    2    0
+##          D    0    0    4  817    0
+##          E    0    0    0    2  849
 ```
+
+As expected the out-of-sample error is a bit bigger than that of the test result prediction: a few values can be found off-diagonal in the confusion matrix.
+
 
 ### Summary of step 2 
 
